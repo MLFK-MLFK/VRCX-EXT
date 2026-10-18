@@ -1,0 +1,26 @@
+node_modules/
+build/
+obj/
+obj1/
+.idea/
+*.log
+*.DotSettings.user
+.vs/
+*.user
+
+Installer/version_define.nsh
+bun.lock
+
+.env.sentry-build-plugin
+AGENTS.md
+AI_GUIDE.md
+CLAUDE.md
+coverage/
+
+# Local scratch/cache directory, never pushed
+1AI/
+
+# Release artefacts that build-all.ps1 writes into the repository root
+VRCX_*.zip
+VRCX_*_Setup.exe
+SHA256SUMS.txt

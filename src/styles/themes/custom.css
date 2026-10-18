@@ -1,0 +1,173 @@
+/* Custom appearance (dark, easy on the eyes)
+ *
+ * The adjustable values are injected onto <html> as inline custom properties by
+ * src/shared/utils/base/customTheme.js; this file only turns them into the shadcn palette plus the
+ * glass rules. Every selector is scoped to [data-theme='custom'], so other themes are untouched.
+ */
+:root[data-theme='custom'] {
+    /* ---- adjustable values (fallbacks only, JS overrides them) ---- */
+    --custom-base: #12161f;
+    --custom-accent: #6ea8fe;
+    --custom-accent-foreground: #0b0d10;
+    --custom-surface-alpha: 62;
+    --custom-surface-blur: 12px;
+    --custom-overlay-alpha: 82;
+    --custom-overlay-blur: 18px;
+    --custom-image: none;
+    --custom-image-opacity: 0.55;
+    --custom-image-blur: 0px;
+    --custom-image-size: cover;
+    --custom-image-position: center;
+    --custom-image-repeat: no-repeat;
+    --custom-radius: 8px;
+
+    /* ---- derived palette ---- */
+    --custom-surface: color-mix(in oklab, var(--custom-base) 97%, white);
+
+    --background: color-mix(in oklab, var(--custom-base) 72%, black);
+    --foreground: color-mix(in oklab, var(--custom-base) 8%, white);
+
+    --card: color-mix(in oklab, var(--custom-base) 95%, white);
+    --card-foreground: var(--foreground);
+    --popover: color-mix(in oklab, var(--custom-base) 92%, white);
+    --popover-foreground: var(--foreground);
+
+    --primary: var(--custom-accent);
+    --primary-foreground: var(--custom-accent-foreground);
+
+    --secondary: color-mix(in oklab, var(--custom-base) 87%, white);
+    --secondary-foreground: var(--foreground);
+    --muted: color-mix(in oklab, var(--custom-base) 87%, white);
+    --muted-foreground: color-mix(in oklab, var(--custom-base) 32%, white);
+    --accent: color-mix(in oklab, var(--custom-base) 83%, white);
+    --accent-foreground: var(--foreground);
+
+    --destructive: oklch(0.577 0.245 27.325);
+    --destructive-foreground: oklch(0.985 0 0);
+
+    --border: color-mix(in oklab, var(--custom-base) 84%, white);
+    --input: color-mix(in oklab, var(--custom-base) 84%, white);
+    --ring: color-mix(in oklab, var(--custom-accent) 55%, transparent);
+
+    --chart-1: var(--custom-accent);
+    --chart-2: oklch(0.696 0.17 162.48);
+    --chart-3: oklch(0.769 0.188 70.08);
+    --chart-4: oklch(0.627 0.265 303.9);
+    --chart-5: oklch(0.645 0.246 16.439);
+
+    --sidebar: color-mix(in oklab, var(--custom-base) 84%, black);
+    --sidebar-foreground: var(--foreground);
+    --sidebar-primary: var(--custom-accent);
+    --sidebar-primary-foreground: var(--custom-accent-foreground);
+    --sidebar-accent: color-mix(in oklab, var(--custom-base) 83%, white);
+    --sidebar-accent-foreground: var(--foreground);
+    --sidebar-border: color-mix(in oklab, var(--custom-base) 84%, white);
+    --sidebar-ring: var(--ring);
+
+    --radius: var(--custom-radius);
+
+    /* Base colour of the window itself. This also replaces the host's own window tint, which would
+     * otherwise paint over the wallpaper layer below. */
+    background-color: var(--background);
+}
+
+/* The host paints an opaque `bg-background` on <body>. That background is painted after the
+ * negative z-index wallpaper layers, so it has to be cleared for the image to be visible at all. */
+:root[data-theme='custom'] body {
+    background-color: transparent;
+}
+
+/* ---- wallpaper layer: sits directly on the base colour, seen through the glass panels ---- */
+:root[data-theme='custom'] body::before {
+    content: '';
+    position: fixed;
+    inset: -48px;
+    z-index: -1;
+    pointer-events: none;
+    background-image: var(--custom-image);
+    background-size: var(--custom-image-size);
+    background-position: var(--custom-image-position);
+    background-repeat: var(--custom-image-repeat);
+    opacity: var(--custom-image-opacity);
+    filter: blur(var(--custom-image-blur));
+}
+
+/* Vignette: tames the wallpaper edges and keeps text comfortable to read */
+:root[data-theme='custom'] body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+        130% 95% at 50% 0%,
+        transparent 30%,
+        color-mix(in oklab, var(--custom-base) 60%, black) 100%
+    );
+    opacity: 0.6;
+}
+
+/* ---- glass shell: sidebar / content area / status bar / sticky table header ----
+ * The shell is the window the wallpaper is seen through, so it only gets a light scrim: the content
+ * container is stacked on top of it, and two solid layers would hide the image completely. */
+:root[data-theme='custom'] .bg-sidebar {
+    background-color: color-mix(in srgb, var(--custom-surface) calc(var(--custom-surface-alpha) * 0.35%), transparent);
+    backdrop-filter: blur(var(--custom-surface-blur));
+}
+
+/* ---- content container: the actual glass card ----
+ * `body` keeps the selector more specific than the host's own `html.dark .x-container` rule. */
+:root[data-theme='custom'] body .x-container {
+    background: color-mix(in srgb, var(--custom-surface) calc(var(--custom-surface-alpha) * 1%), transparent);
+    backdrop-filter: blur(var(--custom-surface-blur));
+    box-shadow: inset 0 1px 0 0 color-mix(in srgb, white 5%, transparent);
+}
+
+/* ---- glass overlays: dialogs, menus and popovers ----
+ * One glass material for every floating surface, so opening the player panel or a menu shows the
+ * wallpaper through the surface instead of replacing it with a second opaque slab.
+ * `[role='dialog']` also catches the scrollable dialog variant, which renders the reka-ui primitive
+ * directly and therefore has no data-slot. */
+:root[data-theme='custom'] [role='dialog'],
+:root[data-theme='custom'] [role='alertdialog'],
+:root[data-theme='custom'] [data-slot='dialog-content'],
+:root[data-theme='custom'] [data-slot='alert-dialog-content'],
+:root[data-theme='custom'] [data-slot='sheet-content'],
+:root[data-theme='custom'] [data-slot='popover-content'],
+:root[data-theme='custom'] [data-slot='hover-card-content'],
+:root[data-theme='custom'] [data-slot='dropdown-menu-sub-content'],
+:root[data-theme='custom'] [data-slot='context-menu-sub-content'],
+:root[data-theme='custom'] [data-slot='select-content'],
+:root[data-theme='custom'] [data-slot='command'] {
+    background-color: color-mix(in srgb, var(--custom-surface) calc(var(--custom-overlay-alpha) * 1%), transparent);
+    backdrop-filter: blur(var(--custom-overlay-blur));
+}
+
+/* Menu containers carry the frost on the element itself. A pseudo element cannot be used here: the
+ * enter animation makes the menu a composited, semi transparent layer, and a backdrop-filter on a
+ * descendant stops sampling the backdrop for as long as that animation runs - the frost would be
+ * missing while opening and then pop in the moment the animation ends.
+ *
+ * Their backdrop-filter would normally become the backdrop root and containing block of an inline
+ * submenu, hiding the submenu's own frost and cropping it, but the submenu content components portal
+ * themselves to the body, so neither happens. */
+:root[data-theme='custom'] [data-slot='dropdown-menu-content'],
+:root[data-theme='custom'] [data-slot='context-menu-content'] {
+    background-color: color-mix(in srgb, var(--custom-surface) calc(var(--custom-overlay-alpha) * 1%), transparent);
+    backdrop-filter: blur(var(--custom-overlay-blur));
+}
+
+/* Cards only take the tint: a backdrop-filter would turn every card into a containing block for its
+ * absolutely positioned children, which would move badges and close buttons around. */
+:root[data-theme='custom'] [data-slot='card'],
+:root[data-theme='custom'] [data-slot='alert'] {
+    background-color: color-mix(in srgb, var(--custom-surface) calc(var(--custom-overlay-alpha) * 1%), transparent);
+}
+
+/* The dimming layer behind a modal gets frost as well, so the page behind it reads as blurred glass
+ * rather than a flat black wash. Each overlay keeps its own darkness. */
+:root[data-theme='custom'] [data-slot='dialog-overlay'],
+:root[data-theme='custom'] [data-slot='alert-dialog-overlay'],
+:root[data-theme='custom'] [data-slot='sheet-overlay'] {
+    backdrop-filter: blur(6px);
+}
